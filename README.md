@@ -1,20 +1,20 @@
 # nettle
 
 Diagnostics for compilers and other tools that point into source text, for
-[Meadow](https://github.com/mcdearman/meadow). A report has labelled spans
+[Meadow](https://github.com/meadow-lang/meadow). A report has labelled spans
 with arrows and messages, can span several files and many lines, and can end
 with notes and help. It is drawn in colour or without.
 
 This package is a port of Rust's
 [`ariadne`](https://github.com/zesterer/ariadne) 0.6.0. It draws reports
 character for character, and escape for escape, as the crate does. Text is
-measured with [unicodeWidth](https://github.com/mcdearman/UnicodeWidth),
+measured with [unicodeWidth](https://github.com/meadow-lang/UnicodeWidth),
 the port of the `unicode-width` version the crate uses.
 
 ## Install
 
 ```sh
-meadow add mcdearman/Nettle
+meadow add meadow-lang/Nettle
 ```
 
 ## Use
