@@ -77,8 +77,8 @@ fun sgr base c =
 @pub fun colorGeneratorFrom (a, b, c) (minBrightness : Float32) =
   let zero = toFloat32 0.0 in
   let one = toFloat32 1.0 in
-  let atLeastZero = if minBrightness >=. zero then minBrightness else zero in
-  let clamped = if atLeastZero <=. one then atLeastZero else one in
+  let atLeastZero = if minBrightness >= zero then minBrightness else zero in
+  let clamped = if atLeastZero <= one then atLeastZero else one in
   ColorGenerator { state = (a % 65536, b % 65536, c % 65536), minBrightness = clamped }
 
 -- The generator the crate starts from by default.
@@ -88,7 +88,7 @@ fun sgr base c =
 fun stepState s i = (s + 40503 * (i * 4 + 1130)) % 65536
 
 -- A state as a brightness in `[minBrightness, 1]`, in 32-bit arithmetic.
-fun brightness (s : Int) (m : Float32) = toFloat32 (toFloat s) /. toFloat32 65535.0 *. (toFloat32 1.0 -. m) +. m
+fun brightness (s : Int) (m : Float32) = toFloat32 (toFloat s) / toFloat32 65535.0 * (toFloat32 1.0 - m) + m
 
 -- The next colour, and the generator to take the one after it from.
 @pub fun nextColor (g : ColorGenerator) =
@@ -99,7 +99,7 @@ fun brightness (s : Int) (m : Float32) = toFloat32 (toFloat s) /. toFloat32 6553
       let s2 = stepState c 2 in
       let m = g.minBrightness in
       let sum =
-        brightness s2 m *. toFloat32 5.0 +. brightness s1 m *. toFloat32 30.0 +. brightness s0 m *. toFloat32 180.0
+        brightness s2 m * toFloat32 5.0 + brightness s1 m * toFloat32 30.0 + brightness s0 m * toFloat32 180.0
       in
       let index = 16 + floor (toFloat64 sum) in
       (Color.Fixed (if index > 255 then 255 else index), { g | state = (s0, s1, s2) })
