@@ -30,8 +30,9 @@ use Nettle.Write (render)
 
 @cfg(test)
 fun num s i n =
-  let rec go k acc = if k >= n then acc else go (k + 1) (acc * 64 + (toInt (stringByteAt s (i + k)) - 48)) in
-  (go 0 0, i + n)
+  let rec go k acc =
+    if k >= n then acc else go (k + 1) (acc * 64 + (toInt (stringByteAt s (i + k)) - 48))
+  in (go 0 0, i + n)
 
 @cfg(test)
 fun signedNum s i n =
@@ -44,48 +45,26 @@ fun str s i =
   (stringSlice s (i + 3) (i + 3 + len), i + 3 + len)
 
 @cfg(test)
-fun flag s i =
-  match num s i 1 with
-  | (n, next) -> (n == 1, next)
+fun flag s i = match num s i 1 with | (n, next) -> (n == 1, next)
 
 -- Runs `f` `n` times from `i`, threading `acc` through.
 @cfg(test)
 fun times n i acc f =
   let rec go k at a =
-    if k >= n
-    then (a, at)
-    else
-      match f at a with
-      | (a2, next) -> go (k + 1) next a2
-  in
-  go 0 i acc
+    if k >= n then (a, at) else match f at a with | (a2, next) -> go (k + 1) next a2
+  in go 0 i acc
 
 @cfg(test)
 def namedColors =
-  [ Primary,
-    Black,
-    Red,
-    Green,
-    Yellow,
-    Blue,
-    Magenta,
-    Cyan,
-    White,
-    BrightBlack,
-    BrightRed,
-    BrightGreen,
-    BrightYellow,
-    BrightBlue,
-    BrightMagenta,
-    BrightCyan,
-    BrightWhite ]
+  [
+    Primary, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, BrightBlack, BrightRed,
+    BrightGreen, BrightYellow, BrightBlue, BrightMagenta, BrightCyan, BrightWhite
+  ]
 
 @cfg(test)
 fun readColor s i =
   match num s i 1 with
-  | (17, next) ->
-      let v = num s next 2 in
-      (Fixed (fst v), snd v)
+  | (17, next) -> let v = num s next 2 in (Fixed (fst v), snd v)
   | (18, next) ->
       let r = num s next 2 in
       let g = num s (snd r) 2 in
@@ -118,15 +97,12 @@ fun readConfig s i =
       |> withTabWidth (fst tabs)
       |> withCharSet (if fst ascii then CharSet.Ascii else CharSet.Unicode)
       |> withIndexType (if fst bytes then IndexType.Byte else IndexType.Char)
-  in
-  (c, snd tabs)
+  in (c, snd tabs)
 
 @cfg(test)
 fun readMaybe s i f =
   match flag s i with
-  | (True, next) ->
-      (match f next with
-       | (x, after) -> (Just x, after))
+  | (True, next) -> (match f next with | (x, after) -> (Just x, after))
   | (False, next) -> (None, next)
 
 @cfg(test)
@@ -148,15 +124,12 @@ fun readLabel s i mkId =
     match fst color with
     | Just c -> labelColor c l1
     | None -> l1
-  in
-  (l2 |> labelOrder (fst order) |> labelPriority (fst priority), snd priority)
+  in (l2 |> labelOrder (fst order) |> labelPriority (fst priority), snd priority)
 
 @cfg(test)
 fun readStrings s i =
   let n = num s i 1 in
-  times (fst n) (snd n) V.empty (\at acc ->
-    let m = str s at in
-    (V.pushBack acc (fst m), snd m))
+  times (fst n) (snd n) V.empty (\at acc -> let m = str s at in (V.pushBack acc (fst m), snd m))
 
 @cfg(test)
 fun readLabels s i mkId =
@@ -226,12 +199,10 @@ fun runReport i =
   let count = num s (snd withIds) 1 in
   let read =
     times (fst count) (snd count) V.empty (\at acc ->
-      let p = readSource s at in
-      (V.pushBack acc (fst p), snd p))
+      let p = readSource s at in (V.pushBack acc (fst p), snd p))
   in
   let srcs = fst read in
-  if fst withIds
-  then
+  if fst withIds then
     let mkId = \k -> if k < V.len srcs then fst (V.getOr noSource srcs k) else "missing.rs" in
     let cache =
       Cache {
@@ -254,17 +225,18 @@ fun runReport i =
 
 @cfg(test)
 fun checkReports i n bad =
-  if i >= stringByteLength reports
-  then (n, bad)
+  if i >= stringByteLength reports then (n, bad)
   else
     match runReport i with
-    | (want, got, next) -> checkReports next (n + 1) (if want == got then bad else V.pushBack bad (n, want, got))
+    | (want, got, next) ->
+        checkReports next (n + 1) (if want == got then bad else V.pushBack bad (n, want, got))
 
 -- The number of reports, and the first few the port draws differently.
 @cfg(test)
 @test fun reportsMatchTheCrate () =
   match checkReports 0 0 V.empty with
-  | (n, bad) -> assertEq (n, V.take bad 2) (1200, []) "reports the port and ariadne draw differently"
+  | (n, bad) ->
+      assertEq (n, V.take bad 2) (1200, []) "reports the port and ariadne draw differently"
 
 @cfg(test)
 fun brightnessOf kind m =
@@ -275,10 +247,7 @@ fun brightnessOf kind m =
   | _ -> toFloat32 (0.0 - magnitude)
 
 @cfg(test)
-fun fixedValue color =
-  match color with
-  | Fixed v -> v
-  | _ -> 0 - 1
+fun fixedValue color = match color with | Fixed v -> v | _ -> 0 - 1
 
 @cfg(test)
 fun runColors i =
@@ -290,9 +259,7 @@ fun runColors i =
   let m = num s (snd kind) 3 in
   let n = num s (snd m) 1 in
   let want =
-    times (fst n) (snd n) V.empty (\at acc ->
-      let v = num s at 2 in
-      (V.pushBack acc (fst v), snd v))
+    times (fst n) (snd n) V.empty (\at acc -> let v = num s at 2 in (V.pushBack acc (fst v), snd v))
   in
   let g = colorGeneratorFrom (fst a, fst b, fst c) (brightnessOf (fst kind) (fst m)) in
   let got = V.map fixedValue (fst (nextColors (fst n) g)) in
@@ -300,16 +267,17 @@ fun runColors i =
 
 @cfg(test)
 fun checkColors i n bad =
-  if i >= stringByteLength colors
-  then (n, bad)
+  if i >= stringByteLength colors then (n, bad)
   else
     match runColors i with
-    | (want, got, next) -> checkColors next (n + 1) (if want == got then bad else V.pushBack bad (n, want, got))
+    | (want, got, next) ->
+        checkColors next (n + 1) (if want == got then bad else V.pushBack bad (n, want, got))
 
 @cfg(test)
 @test fun colorsMatchTheCrate () =
   match checkColors 0 0 V.empty with
-  | (n, bad) -> assertEq (n, V.take bad 2) (200, []) "colour generators the port and ariadne differ on"
+  | (n, bad) ->
+      assertEq (n, V.take bad 2) (200, []) "colour generators the port and ariadne differ on"
 
 @cfg(test)
 fun showFound found =
@@ -321,8 +289,7 @@ fun showFound found =
 fun readQuery s i =
   let offset = num s i 2 in
   let found = flag s (snd offset) in
-  if fst found
-  then
+  if fst found then
     let lo = num s (snd found) 2 in
     let idx = num s (snd lo) 2 in
     let col = num s (snd idx) 2 in
@@ -344,21 +311,20 @@ fun runLines i =
   in
   let len = num s (snd wantLines) 2 in
   let queries =
-    times 6 (snd len) V.empty (\at acc ->
-      let q = readQuery s at in
-      (V.pushBack acc (fst q), snd q))
+    times 6 (snd len) V.empty (\at acc -> let q = readQuery s at in (V.pushBack acc (fst q), snd q))
   in
   let range =
-    times 4 (snd queries) V.empty (\at acc ->
-      let v = num s at 2 in
-      (V.pushBack acc (fst v), snd v))
+    times 4 (snd queries) V.empty (\at acc -> let v = num s at 2 in (V.pushBack acc (fst v), snd v))
   in
   let r = fst range in
   let want = (fst wantLines, fst len, V.map snd (fst queries), V.drop r 2) in
-  let gotLines = V.map (\(l : Line) -> "${l.offset}/${l.charLen}/${lineText l src}") (sourceLines src) in
+  let gotLines =
+    V.map (\(l : Line) -> "${l.offset}/${l.charLen}/${lineText l src}") (sourceLines src)
+  in
   let gotQueries =
     V.map
-      (\(q, (offset, _)) -> showFound (if q % 2 == 1 then byteLine offset src else offsetLine offset src))
+      (\(q, (offset, _)) ->
+        showFound (if q % 2 == 1 then byteLine offset src else offsetLine offset src))
       (V.zip (V.range 0 6) (fst queries))
   in
   let lr = lineRange (span (V.getOr 0 r 0) (V.getOr 0 r 1)) src in
@@ -367,11 +333,11 @@ fun runLines i =
 
 @cfg(test)
 fun checkLines i n bad =
-  if i >= stringByteLength lines
-  then (n, bad)
+  if i >= stringByteLength lines then (n, bad)
   else
     match runLines i with
-    | (want, got, next) -> checkLines next (n + 1) (if want == got then bad else V.pushBack bad (n, want, got))
+    | (want, got, next) ->
+        checkLines next (n + 1) (if want == got then bad else V.pushBack bad (n, want, got))
 
 @cfg(test)
 @test fun linesMatchTheCrate () =
@@ -391,14 +357,10 @@ fun checkLines i n bad =
   let out = render r (sources [("a.mw", "def x = foo\n")]) in
   assertEq
     (S.split "\n" out)
-    [ "Error: unknown name",
-      "   ╭─[ a.mw:1:9 ]",
-      "   │",
-      " 1 │ def x = foo",
-      "   │         ─┬─  ",
-      "   │          ╰─── not in scope",
-      "───╯",
-      "" ]
+    [
+      "Error: unknown name", "   ╭─[ a.mw:1:9 ]", "   │", " 1 │ def x = foo", "   │         ─┬─  ",
+      "   │          ╰─── not in scope", "───╯", ""
+    ]
     "a report with one label"
 
 -- The README's example, as the crate draws it.
@@ -413,21 +375,13 @@ fun checkLines i n bad =
       |> withLabel (label (spanIn "main.mw" 4 7) |> labelMessage "`add` takes `Int`s")
       |> withLabel (label (spanIn "main.mw" 38 43) |> labelMessage "this is a `String`")
       |> withNote "convert it with `toInt`"
-  in
-  assertEq
-    (S.split "\n" (render report (namedSource "main.mw" (source text))))
-    [ "[03] Error: mismatched types",
-      "   ╭─[ main.mw:3:18 ]",
-      "   │",
-      " 1 │ fun add x y = x + y",
-      "   │     ─┬─  ",
-      "   │      ╰─── `add` takes `Int`s",
-      "   │ ",
-      " 3 │ def main = add 1 \"two\"",
-      "   │                  ──┬──  ",
-      "   │                    ╰──── this is a `String`",
-      "   │ ",
-      "   │ Note: convert it with `toInt`",
-      "───╯",
-      "" ]
-    "the README's report"
+  in assertEq
+       (S.split "\n" (render report (namedSource "main.mw" (source text))))
+       [
+         "[03] Error: mismatched types", "   ╭─[ main.mw:3:18 ]", "   │",
+         " 1 │ fun add x y = x + y", "   │     ─┬─  ", "   │      ╰─── `add` takes `Int`s", "   │ ",
+         " 3 │ def main = add 1 \"two\"", "   │                  ──┬──  ",
+         "   │                    ╰──── this is a `String`", "   │ ",
+         "   │ Note: convert it with `toInt`", "───╯", ""
+       ]
+       "the README's report"
