@@ -93,7 +93,13 @@ fun ifColor (c : Config) color = if c.color then Just color else None
 @pub(pkg) fun noteColor c = ifColor c (Color.Fixed 115)
 
 -- A labelled span of a report.
-@pub record Label id = { span : Span id, msg : Maybe String, color : Maybe Color, order : Int, priority : Int }
+@pub record Label id = {
+  span : Span id,
+  msg : Maybe String,
+  color : Maybe Color,
+  order : Int,
+  priority : Int
+}
 
 -- A label on `sp`, with no message. The crate fails on a span that ends
 -- before it starts; here such a span ends where it starts.
@@ -117,7 +123,11 @@ fun ifColor (c : Config) color = if c.color then Just color else None
 @pub fun labelPriority n (l : Label id) = { l | priority = n }
 
 -- What a report is: its title and colour.
-@pub data ReportKind = Error | Warning | Advice | Custom String Color
+@pub data ReportKind
+  = Error
+  | Warning
+  | Advice
+  | Custom String Color
 
 @pub fun kindName k =
   match k with
@@ -159,7 +169,9 @@ fun ifColor (c : Config) color = if c.color then Just color else None
 
 -- `s` padded with spaces to at least two characters, as the crate formats a
 -- code with `{:02}`.
-fun padCode s = if arrayLen (stringToChars s) < 2 then S.concat s (S.repeat " " (2 - arrayLen (stringToChars s))) else s
+fun padCode s =
+  if arrayLen (stringToChars s) < 2 then S.concat s (S.repeat " " (2 - arrayLen (stringToChars s)))
+  else s
 
 -- The report's code, shown before its kind.
 @pub fun withCode c (r : Report id) = { r | code = Just (padCode c) }
