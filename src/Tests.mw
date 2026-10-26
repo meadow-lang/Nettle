@@ -268,11 +268,11 @@ fun checkReports i n bad =
 
 @cfg(test)
 fun brightnessOf kind m =
-  let magnitude = toFloat m /. 65536.0 in
+  let magnitude = toFloat m / 65536.0 in
   match kind with
   | 0 -> toFloat32 magnitude
-  | 1 -> toFloat32 0.0 /. toFloat32 0.0
-  | _ -> toFloat32 (0.0 -. magnitude)
+  | 1 -> toFloat32 0.0 / toFloat32 0.0
+  | _ -> toFloat32 (0.0 - magnitude)
 
 @cfg(test)
 fun fixedValue color =
